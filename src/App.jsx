@@ -4,6 +4,7 @@ import {
   Calendar, Trophy, Users, Newspaper, ChevronDown, ChevronUp,
   Crown, ClipboardList, Camera
 } from "lucide-react";
+import { useAuth } from "./AuthGate.jsx";
 
 /* ============================== მუდმივები ============================== */
 
@@ -1108,6 +1109,7 @@ export default function App() {
 /* ============================== მთავარი გვერდი ============================== */
 
 function HomePage({ schools, onOpen, onAdd, onEdit, onDelete }) {
+  const { canEdit } = useAuth();
   return (
     <div>
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
@@ -1115,9 +1117,11 @@ function HomePage({ schools, onOpen, onAdd, onEdit, onDelete }) {
           <h2 className="text-2xl text-slate-800 font-semibold" style={{ fontFamily: "Oswald, sans-serif" }}>საფეხბურთო სკოლები</h2>
           <p className="text-slate-500 text-sm mt-1">აირჩიეთ სკოლა ან დაამატეთ ახალი</p>
         </div>
-        <button onClick={onAdd} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-700 text-white font-medium hover:bg-emerald-800 shadow-sm text-sm">
-          <Plus className="w-4 h-4" /> დაამატე სკოლა
-        </button>
+        {canEdit && (
+          <button onClick={onAdd} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-700 text-white font-medium hover:bg-emerald-800 shadow-sm text-sm">
+            <Plus className="w-4 h-4" /> დაამატე სკოლა
+          </button>
+        )}
       </div>
 
       {schools.length === 0 ? (
@@ -1144,14 +1148,16 @@ function HomePage({ schools, onOpen, onAdd, onEdit, onDelete }) {
                 )}
               </button>
               <span className="mt-2 text-sm font-medium text-slate-700 text-center">{s.name}</span>
-              <div className="absolute -top-2 -right-2 hidden group-hover:flex gap-1">
-                <button onClick={() => onEdit(s)} className="p-1.5 rounded-full bg-white shadow border border-slate-200 hover:bg-slate-50">
-                  <Pencil className="w-3.5 h-3.5 text-slate-600" />
-                </button>
-                <button onClick={() => onDelete(s.id)} className="p-1.5 rounded-full bg-white shadow border border-slate-200 hover:bg-rose-50">
-                  <Trash2 className="w-3.5 h-3.5 text-rose-500" />
-                </button>
-              </div>
+              {canEdit && (
+                <div className="absolute -top-2 -right-2 hidden group-hover:flex gap-1">
+                  <button onClick={() => onEdit(s)} className="p-1.5 rounded-full bg-white shadow border border-slate-200 hover:bg-slate-50">
+                    <Pencil className="w-3.5 h-3.5 text-slate-600" />
+                  </button>
+                  <button onClick={() => onDelete(s.id)} className="p-1.5 rounded-full bg-white shadow border border-slate-200 hover:bg-rose-50">
+                    <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -1163,13 +1169,16 @@ function HomePage({ schools, onOpen, onAdd, onEdit, onDelete }) {
 /* ============================== სიახლეების ტაბი ============================== */
 
 function NewsTab({ items, onAdd, onEdit, onDelete }) {
+  const { canEdit } = useAuth();
   return (
     <div>
       <div className="flex items-center justify-between mb-5">
         <h2 className="text-xl text-slate-800 font-semibold" style={{ fontFamily: "Oswald, sans-serif" }}>სიახლეები</h2>
-        <button onClick={onAdd} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-700 text-white font-medium hover:bg-emerald-800 text-sm">
-          <Plus className="w-4 h-4" /> სიახლის დამატება
-        </button>
+        {canEdit && (
+          <button onClick={onAdd} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-700 text-white font-medium hover:bg-emerald-800 text-sm">
+            <Plus className="w-4 h-4" /> სიახლის დამატება
+          </button>
+        )}
       </div>
       {items.length === 0 ? (
         <EmptyState text="სიახლეები ჯერ არ დამატებულა" />
@@ -1181,10 +1190,12 @@ function NewsTab({ items, onAdd, onEdit, onDelete }) {
               <div className="p-4">
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="font-semibold text-slate-800">{n.title}</h3>
-                  <div className="flex gap-1 flex-shrink-0">
-                    <button onClick={() => onEdit(n)} className="p-1.5 rounded-lg hover:bg-slate-100"><Pencil className="w-4 h-4 text-slate-500" /></button>
-                    <button onClick={() => onDelete(n.id)} className="p-1.5 rounded-lg hover:bg-rose-50"><Trash2 className="w-4 h-4 text-rose-500" /></button>
-                  </div>
+                  {canEdit && (
+                    <div className="flex gap-1 flex-shrink-0">
+                      <button onClick={() => onEdit(n)} className="p-1.5 rounded-lg hover:bg-slate-100"><Pencil className="w-4 h-4 text-slate-500" /></button>
+                      <button onClick={() => onDelete(n.id)} className="p-1.5 rounded-lg hover:bg-rose-50"><Trash2 className="w-4 h-4 text-rose-500" /></button>
+                    </div>
+                  )}
                 </div>
                 <p className="text-xs text-slate-400 mt-1">{n.date}</p>
                 <p className="text-sm text-slate-600 mt-2 whitespace-pre-line">{n.text}</p>
@@ -1200,6 +1211,7 @@ function NewsTab({ items, onAdd, onEdit, onDelete }) {
 /* ============================== გუნდების ტაბი ============================== */
 
 function TeamsTab({ teams, players, expandedTeam, setExpandedTeam, onAddTeam, onEditTeam, onDeleteTeam, onAddPlayer, onEditPlayer, onDeletePlayer }) {
+  const { canEdit } = useAuth();
   const groups = {};
   teams.forEach((t) => {
     if (!groups[t.ageGroup]) groups[t.ageGroup] = [];
@@ -1211,9 +1223,11 @@ function TeamsTab({ teams, players, expandedTeam, setExpandedTeam, onAddTeam, on
     <div>
       <div className="flex items-center justify-between mb-5">
         <h2 className="text-xl text-slate-800 font-semibold" style={{ fontFamily: "Oswald, sans-serif" }}>გუნდები</h2>
-        <button onClick={onAddTeam} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-700 text-white font-medium hover:bg-emerald-800 text-sm">
-          <Plus className="w-4 h-4" /> დაამატე გუნდი
-        </button>
+        {canEdit && (
+          <button onClick={onAddTeam} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-700 text-white font-medium hover:bg-emerald-800 text-sm">
+            <Plus className="w-4 h-4" /> დაამატე გუნდი
+          </button>
+        )}
       </div>
       {teams.length === 0 ? (
         <EmptyState text="გუნდები ჯერ არ დამატებულა" />
@@ -1234,8 +1248,12 @@ function TeamsTab({ teams, players, expandedTeam, setExpandedTeam, onAddTeam, on
                           <p className="font-medium text-slate-800 truncate">{t.name}</p>
                           <p className="text-xs text-slate-500">მწვრთნელი: {t.coach}</p>
                         </div>
-                        <button onClick={() => onEditTeam(t)} className="p-1.5 rounded-lg hover:bg-slate-100"><Pencil className="w-4 h-4 text-slate-500" /></button>
-                        <button onClick={() => onDeleteTeam(t.id)} className="p-1.5 rounded-lg hover:bg-rose-50"><Trash2 className="w-4 h-4 text-rose-500" /></button>
+                        {canEdit && (
+                          <>
+                            <button onClick={() => onEditTeam(t)} className="p-1.5 rounded-lg hover:bg-slate-100"><Pencil className="w-4 h-4 text-slate-500" /></button>
+                            <button onClick={() => onDeleteTeam(t.id)} className="p-1.5 rounded-lg hover:bg-rose-50"><Trash2 className="w-4 h-4 text-rose-500" /></button>
+                          </>
+                        )}
                       </div>
                       <button
                         onClick={() => setExpandedTeam(isOpen ? null : t.id)}
@@ -1256,15 +1274,21 @@ function TeamsTab({ teams, players, expandedTeam, setExpandedTeam, onAddTeam, on
                                     {p.number != null ? p.number : "•"}
                                   </span>
                                   <span className="flex-1 text-slate-700">{p.name}</span>
-                                  <button onClick={() => onEditPlayer(p)} className="p-1 rounded hover:bg-slate-100"><Pencil className="w-3.5 h-3.5 text-slate-400" /></button>
-                                  <button onClick={() => onDeletePlayer(p.id)} className="p-1 rounded hover:bg-rose-50"><Trash2 className="w-3.5 h-3.5 text-rose-400" /></button>
+                                  {canEdit && (
+                                    <>
+                                      <button onClick={() => onEditPlayer(p)} className="p-1 rounded hover:bg-slate-100"><Pencil className="w-3.5 h-3.5 text-slate-400" /></button>
+                                      <button onClick={() => onDeletePlayer(p.id)} className="p-1 rounded hover:bg-rose-50"><Trash2 className="w-3.5 h-3.5 text-rose-400" /></button>
+                                    </>
+                                  )}
                                 </div>
                               ))}
                             </div>
                           )}
-                          <button onClick={() => onAddPlayer(t.id)} className="flex items-center gap-1 text-emerald-700 text-xs font-medium">
-                            <Plus className="w-3.5 h-3.5" /> მოთამაშის დამატება
-                          </button>
+                          {canEdit && (
+                            <button onClick={() => onAddPlayer(t.id)} className="flex items-center gap-1 text-emerald-700 text-xs font-medium">
+                              <Plus className="w-3.5 h-3.5" /> მოთამაშის დამატება
+                            </button>
+                          )}
                         </div>
                       )}
                     </div>
@@ -1282,6 +1306,7 @@ function TeamsTab({ teams, players, expandedTeam, setExpandedTeam, onAddTeam, on
 /* ============================== განრიგის ტაბი ============================== */
 
 function ScheduleTab({ items, teams, onAddMatch, onAddTraining, onEdit, onDelete }) {
+  const { canEdit } = useAuth();
   const groups = {};
   items.forEach((it) => {
     if (!groups[it.ageGroup]) groups[it.ageGroup] = [];
@@ -1295,14 +1320,16 @@ function ScheduleTab({ items, teams, onAddMatch, onAddTraining, onEdit, onDelete
     <div>
       <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
         <h2 className="text-xl text-slate-800 font-semibold" style={{ fontFamily: "Oswald, sans-serif" }}>განრიგი</h2>
-        <div className="flex gap-2">
-          <button onClick={onAddMatch} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-700 text-white font-medium hover:bg-emerald-800 text-sm">
-            <Plus className="w-4 h-4" /> მატჩის დამატება
-          </button>
-          <button onClick={onAddTraining} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-300 text-slate-700 font-medium hover:bg-slate-50 text-sm">
-            <Plus className="w-4 h-4" /> ვარჯიშის დამატება
-          </button>
-        </div>
+        {canEdit && (
+          <div className="flex gap-2">
+            <button onClick={onAddMatch} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-700 text-white font-medium hover:bg-emerald-800 text-sm">
+              <Plus className="w-4 h-4" /> მატჩის დამატება
+            </button>
+            <button onClick={onAddTraining} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-300 text-slate-700 font-medium hover:bg-slate-50 text-sm">
+              <Plus className="w-4 h-4" /> ვარჯიშის დამატება
+            </button>
+          </div>
+        )}
       </div>
       {items.length === 0 ? (
         <EmptyState text="განრიგში ჩანაწერები ჯერ არ არის" />
@@ -1331,8 +1358,12 @@ function ScheduleTab({ items, teams, onAddMatch, onAddTraining, onEdit, onDelete
                           </p>
                           {it.notes && <p className="text-xs text-slate-400 mt-0.5">{it.notes}</p>}
                         </div>
-                        <button onClick={() => onEdit(it)} className="p-1.5 rounded-lg hover:bg-slate-100 flex-shrink-0"><Pencil className="w-4 h-4 text-slate-500" /></button>
-                        <button onClick={() => onDelete(it.id)} className="p-1.5 rounded-lg hover:bg-rose-50 flex-shrink-0"><Trash2 className="w-4 h-4 text-rose-500" /></button>
+                        {canEdit && (
+                          <>
+                            <button onClick={() => onEdit(it)} className="p-1.5 rounded-lg hover:bg-slate-100 flex-shrink-0"><Pencil className="w-4 h-4 text-slate-500" /></button>
+                            <button onClick={() => onDelete(it.id)} className="p-1.5 rounded-lg hover:bg-rose-50 flex-shrink-0"><Trash2 className="w-4 h-4 text-rose-500" /></button>
+                          </>
+                        )}
                       </div>
                     );
                   })}
@@ -1349,6 +1380,7 @@ function ScheduleTab({ items, teams, onAddMatch, onAddTraining, onEdit, onDelete
 /* ============================== შედეგების ტაბი ============================== */
 
 function ResultsTab({ items, teams, players, expandedResult, setExpandedResult, onAdd, onEdit, onDelete }) {
+  const { canEdit } = useAuth();
   const groups = {};
   items.forEach((r) => {
     if (!groups[r.ageGroup]) groups[r.ageGroup] = [];
@@ -1390,9 +1422,11 @@ function ResultsTab({ items, teams, players, expandedResult, setExpandedResult, 
     <div>
       <div className="flex items-center justify-between mb-5">
         <h2 className="text-xl text-slate-800 font-semibold" style={{ fontFamily: "Oswald, sans-serif" }}>შედეგები</h2>
-        <button onClick={onAdd} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-700 text-white font-medium hover:bg-emerald-800 text-sm">
-          <Plus className="w-4 h-4" /> შედეგის დამატება
-        </button>
+        {canEdit && (
+          <button onClick={onAdd} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-700 text-white font-medium hover:bg-emerald-800 text-sm">
+            <Plus className="w-4 h-4" /> შედეგის დამატება
+          </button>
+        )}
       </div>
       {items.length === 0 ? (
         <EmptyState text="შედეგები ჯერ არ დამატებულა" />
@@ -1419,8 +1453,12 @@ function ResultsTab({ items, teams, players, expandedResult, setExpandedResult, 
                               <span className="font-medium text-slate-800 truncate">{r.awayTeamName}</span>
                             </div>
                           </div>
-                          <button onClick={() => onEdit(r)} className="p-1.5 rounded-lg hover:bg-slate-100 flex-shrink-0"><Pencil className="w-4 h-4 text-slate-500" /></button>
-                          <button onClick={() => onDelete(r.id)} className="p-1.5 rounded-lg hover:bg-rose-50 flex-shrink-0"><Trash2 className="w-4 h-4 text-rose-500" /></button>
+                          {canEdit && (
+                            <>
+                              <button onClick={() => onEdit(r)} className="p-1.5 rounded-lg hover:bg-slate-100 flex-shrink-0"><Pencil className="w-4 h-4 text-slate-500" /></button>
+                              <button onClick={() => onDelete(r.id)} className="p-1.5 rounded-lg hover:bg-rose-50 flex-shrink-0"><Trash2 className="w-4 h-4 text-rose-500" /></button>
+                            </>
+                          )}
                           <button onClick={() => setExpandedResult(isOpen ? null : r.id)} className="p-1.5 rounded-lg hover:bg-slate-100 flex-shrink-0">
                             {isOpen ? <ChevronUp className="w-4 h-4 text-slate-500" /> : <ChevronDown className="w-4 h-4 text-slate-500" />}
                           </button>
